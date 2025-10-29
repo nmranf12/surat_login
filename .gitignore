@@ -1,0 +1,5 @@
+# Abaikan file koneksi database
+core/koneksi.php
+
+# Abaikan folder vendor (jika nanti Anda pakai Composer)
+/vendor/

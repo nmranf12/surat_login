@@ -1,0 +1,50 @@
+
+body { 
+    background-color: #f8f9fa; 
+}
+.navbar-logo {
+    height: 30px; 
+    width: auto;  
+}
+
+.form-container { 
+    max-width: 800px; 
+}
+
+:root {
+    --ciamis-color: #805ec3; 
+    --ciamis-color-hover: #4527A0; 
+}
+
+/* Mengganti warna Navbar */
+.bg-primary {
+    background-color: var(--ciamis-color) !important;
+}
+
+
+.btn-primary {
+    background-color: var(--ciamis-color);
+    border-color: var(--ciamis-color);
+}
+.btn-primary:hover {
+    background-color: var(--ciamis-color-hover);
+    border-color: var(--ciamis-color-hover);
+}
+
+.table-dark th {
+    background-color: var(--ciamis-color) !important;
+    border-color: var(--ciamis-color) !important;
+    text-align: center;      
+    vertical-align: middle;  
+}
+
+.table td:first-child {
+    text-align: center;
+    vertical-align: middle;
+}
+
+.table-dark th a {
+    white-space: nowrap;
+}
+
+
