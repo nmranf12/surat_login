@@ -1,6 +1,6 @@
 <?php
 // Hubungkan ke database untuk ambil nomor
-// ▼▼▼ PERBAIKAN: Path 'include' (dihapus ../) ▼▼▼
+
 include 'core/koneksi.php';
 
 // Ambil nomor berikutnya untuk ditampilkan ke user

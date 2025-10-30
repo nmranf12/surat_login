@@ -19,7 +19,7 @@
  */
 
 // --- 1. KONEKSI DATABASE ---
-include 'core/koneksi.php';
+include '../core/koneksi.php';
 
 // --- 2. LOGIKA PENCARIAN (SEARCH FILTERING) ---
 // Inisialisasi variabel untuk query pencarian

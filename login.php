@@ -1,6 +1,6 @@
 <?php
 session_start();
-// Jika sudah login, lempar ke panel admin (index.php)
+// Jika sudah login, masuk ke panel admin (index.php)
 if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) {
     header("Location: index.php");
     exit;

@@ -274,7 +274,7 @@ $sql = "SELECT * FROM tb_surat_arsip" . $sql_where . " ORDER BY $order_by LIMIT 
         modalCloseButton.classList.remove('btn-close-white');
         switch (type) {
             case 'danger':
-                modalTitle.textContent = 'Gagal!';
+                modalTitle.textContent = 'Berhasil!';
                 modalHeader.classList.add('bg-danger', 'text-white');
                 modalTitle.classList.add('text-white');
                 modalCloseButton.classList.add('btn-close-white');
@@ -301,7 +301,6 @@ $sql = "SELECT * FROM tb_surat_arsip" . $sql_where . " ORDER BY $order_by LIMIT 
         modal.show();
     }
 
-    // ### PEMICU NOTIFIKASI (UNTUK halaman_arsip.php) ###
     document.addEventListener('DOMContentLoaded', function () {
         const urlParams = new URLSearchParams(window.location.search);
         const status = urlParams.get('status');

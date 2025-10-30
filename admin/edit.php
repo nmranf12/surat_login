@@ -1,6 +1,6 @@
 <?php
 // --- 1. KONEKSI DATABASE ---
-// ▼▼▼ PERBAIKAN 1: Path 'include' ▼▼▼
+
 include '../core/koneksi.php';
 
 // --- 2. VALIDASI DAN PENGAMBILAN ID DARI URL ---

@@ -1,10 +1,18 @@
 <?php
 // 1. Keamanan
 include 'auth_check.php';
-// 2. Koneksi
+//Keamanan (Hanya Superadmin boleh menjalankan ini)
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'superadmin') {
+
+    header("Location: ../admin/setting_nomor.php?status=arsip_gagal&error=" . urlencode("Hanya Superadmin yang dapat mengarsipkan data."));
+    exit;
+}
+
+
+// 3. Koneksi
 include 'koneksi.php';
 
-// 3. Tentukan mode (Tahun atau Tanggal)
+// 4. Tentukan mode (Tahun atau Tanggal)
 $mode = '';
 $sql_where_condition = '';
 $params = [];
@@ -37,23 +45,23 @@ if (isset($_POST['tahun_arsip']) && !empty($_POST['tahun_arsip']) && is_numeric(
     $types = 'ss';
 
 } else {
-    // --- MODE TIDAK VALID ---
+    
     header("Location: ../admin/setting_nomor.php?status=arsip_gagal&error=Input tidak valid. Pilih tahun atau rentang tanggal.");
     exit;
 }
 
-// 4. Gunakan Transaksi Database
+// 5. Gunakan Transaksi Database
 $koneksi->begin_transaction();
 
 try {
-    // 5. Salin data dari tb_surat ke tb_surat_arsip
+    // 6. Salin data dari tb_surat ke tb_surat_arsip
     $sql_insert = "INSERT INTO tb_surat_arsip SELECT * FROM tb_surat " . $sql_where_condition;
     $stmt_insert = $koneksi->prepare($sql_insert);
     $stmt_insert->bind_param($types, ...$params);
     $stmt_insert->execute();
     $stmt_insert->close();
 
-    // 6. Hapus data dari tb_surat (setelah berhasil disalin)
+    // 7. Hapus data dari tb_surat (setelah berhasil disalin)
     $sql_delete = "DELETE FROM tb_surat " . $sql_where_condition;
     $stmt_delete = $koneksi->prepare($sql_delete);
     $stmt_delete->bind_param($types, ...$params);
@@ -63,19 +71,19 @@ try {
     $rows_affected = $stmt_delete->affected_rows;
     $stmt_delete->close();
 
-    // 7. Jika semua berhasil, simpan perubahan
+    // 8. Jika semua berhasil, simpan perubahan
     $koneksi->commit();
 
     if ($rows_affected > 0) {
-        // Berhasil memindahkan data
+  
         header("Location: ../admin/setting_nomor.php?status=arsip_sukses");
     } else {
-        // Tidak ada data untuk kriteria tsb, tapi tidak error
+
         header("Location: ../admin/setting_nomor.php?status=arsip_kosong");
     }
     
 } catch (mysqli_sql_exception $exception) {
-    // 8. Jika ada error, batalkan semua perubahan
+    // 9. Jika ada error, batalkan semua perubahan
     $koneksi->rollback();
     
     // Kirim pesan error

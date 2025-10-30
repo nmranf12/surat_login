@@ -99,7 +99,7 @@ try {
 
     if ($result->num_rows > 0) {
         while($row = $result->fetch_assoc()) {
-            // Format tanggal agar mudah dibaca di Excel (dd/mm/YYYY)
+            // Format tanggal  (dd/mm/YYYY)
             $tanggal_formatted = date('d/m/Y', strtotime($row["tanggal_surat"]));
             
             // Tulis satu baris data ke file CSV
@@ -120,13 +120,13 @@ try {
     $stmt->close();
     
 } catch (Exception $e) {
-    // Jika terjadi error, tulis pesan error ke file CSV
+
     fputcsv($output, ['Terjadi error saat mengambil data: ' . $e->getMessage()]);
 }
 
 // --- 9. Tutup koneksi dan stream ---
 fclose($output);
 $koneksi->close();
-exit; // Pastikan tidak ada output HTML lain setelah ini
+exit; 
 
 ?>

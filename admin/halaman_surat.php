@@ -1,58 +1,38 @@
 <?php 
-// 1. KUNCI HALAMAN INI DENGAN SATPAM DI BARIS PERTAMA
+
 include '../core/auth_check.php'; 
 
-// 2. Baru sertakan koneksi
 include '../core/koneksi.php';
-
-// --- 3. [BARU] Ambil daftar tahun unik untuk dropdown filter ---
 $tahun_list_result = $koneksi->query("SELECT DISTINCT(tahun) FROM tb_surat WHERE tahun IS NOT NULL ORDER BY tahun DESC");
-// ----------------------------------------
-
-// --- 4. LOGIKA FILTER, PAGINATION, SEARCH, SORT ---
 $limit = 10; 
 $page = (isset($_GET['page']) && is_numeric($_GET['page'])) ? (int)$_GET['page'] : 1;
 $offset = ($page - 1) * $limit;
-
-// Ambil semua parameter filter dari URL
 $search_term  = $_GET['search'] ?? '';
 $filter_tahun = $_GET['filter_tahun'] ?? '';
 $filter_nomor = $_GET['filter_nomor'] ?? '';
-
-// Siapkan variabel untuk query SQL dinamis
-$where_conditions = []; // Array untuk menampung semua kondisi WHERE
-$params = [];           // Array untuk parameter bind_param
-$types = "";            // String untuk tipe data bind_param
-
-// a. Tambahkan filter pencarian teks
+$where_conditions = [];
+$params = [];
+$types = "";
 if (!empty($search_term)) {
     $search_like = '%' . $search_term . '%';
     $where_conditions[] = "(perihal_surat LIKE ? OR kode_surat LIKE ? OR tujuan_surat LIKE ? OR nama_konseptor LIKE ?)";
     array_push($params, $search_like, $search_like, $search_like, $search_like);
     $types .= 'ssss';
 }
-
-// b. Tambahkan filter tahun
 if (!empty($filter_tahun)) {
     $where_conditions[] = "tahun = ?";
     $params[] = $filter_tahun;
-    $types .= 'i'; // 'i' untuk integer
+    $types .= 'i';
 }
-
-// c. Tambahkan filter nomor surat (>=)
 if (!empty($filter_nomor) && is_numeric($filter_nomor)) {
     $where_conditions[] = "nomor_surat >= ?";
     $params[] = $filter_nomor;
-    $types .= 'i'; // 'i' untuk integer
+    $types .= 'i';
 }
-
-// Gabungkan semua kondisi WHERE
 $sql_where = "";
 if (!empty($where_conditions)) {
     $sql_where = " WHERE " . implode(" AND ", $where_conditions);
 }
-
-// --- Hitung Total Data (untuk pagination) ---
 $sql_total = "SELECT COUNT(*) as total FROM tb_surat" . $sql_where;
 $stmt_total = $koneksi->prepare($sql_total);
 if (!empty($params)) { 
@@ -63,8 +43,6 @@ $result_total = $stmt_total->get_result();
 $total_rows = $result_total->fetch_assoc()['total'];
 $total_pages = ceil($total_rows / $limit);
 $stmt_total->close();
-
-// --- Logika Sorting (Versi 2.0 - Perbaikan) ---
 $allowed_sort_columns = ['nomor_surat', 'kode_surat', 'perihal_surat', 'tanggal_surat', 'tahun'];
 $sort_column = $_GET['sort'] ?? 'tahun'; 
 $sort_order = $_GET['order'] ?? 'DESC';
@@ -73,8 +51,6 @@ if (!in_array($sort_column, $allowed_sort_columns)) {
     $sort_order = 'DESC';
 }
 $toggle_order = ($sort_order == 'DESC') ? 'ASC' : 'DESC';
-
-// Buat klausa ORDER BY yang lebih pintar
 $order_by = "";
 if ($sort_column == 'tahun') {
     $order_by = "tahun $sort_order, nomor_surat DESC";
@@ -83,10 +59,9 @@ if ($sort_column == 'tahun') {
 } else {
     $order_by = "$sort_column $sort_order, tahun DESC, nomor_surat DESC";
 }
-
-// --- Query Utama (untuk mengambil data) ---
 $sql = "SELECT * FROM tb_surat" . $sql_where . " ORDER BY $order_by LIMIT $limit OFFSET $offset";
 ?>
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -135,36 +110,38 @@ $sql = "SELECT * FROM tb_surat" . $sql_where . " ORDER BY $order_by LIMIT $limit
                         <h4 class="mb-0">Data Surat Masuk</h4>
                     </div>
                     <div class="col-lg-6 text-lg-end mt-2 mt-lg-0">
-                        <a href="../form.php" class="btn btn-primary btn-sm">
+                        <a href="../form.php" class="btn btn-primary btn-sm mb-1 mb-lg-0">
                             <i class="bi bi-plus-circle-fill"></i> Input
                         </a>
-                        <a href="../core/export.php?search=<?php echo htmlspecialchars($search_term); ?>&filter_tahun=<?php echo htmlspecialchars($filter_tahun); ?>&filter_nomor=<?php echo htmlspecialchars($filter_nomor); ?>&sort=<?php echo $sort_column; ?>&order=<?php echo $sort_order; ?>" class="btn btn-success btn-sm ms-1">
+                        <a href="../core/export.php?search=<?php echo htmlspecialchars($search_term); ?>&filter_tahun=<?php echo htmlspecialchars($filter_tahun); ?>&filter_nomor=<?php echo htmlspecialchars($filter_nomor); ?>&sort=<?php echo $sort_column; ?>&order=<?php echo $sort_order; ?>" class="btn btn-success btn-sm ms-lg-1 mb-1 mb-lg-0">
                             <i class="bi bi-file-earmark-excel-fill"></i> Export
                         </a>
-                        <a href="setting_nomor.php" class="btn btn-warning btn-sm ms-1">
-                            <i class="bi bi-gear-fill"></i> Pengaturan
-                        </a>
-                        <a href="halaman_arsip.php" class="btn btn-secondary btn-sm ms-1">
+                        <a href="halaman_arsip.php" class="btn btn-secondary btn-sm ms-lg-1 mb-1 mb-lg-0">
                              <i class="bi bi-archive-fill"></i> Lihat Arsip
                         </a>
+                        
+                        <a href="setting_nomor.php" class="btn btn-warning btn-sm ms-lg-1 mb-1 mb-lg-0">
+                            <i class="bi bi-gear-fill"></i> Pengaturan
+                        </a>
+                        
                         <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'superadmin'): ?>
-                            <a href="registrasi_admin.php" class="btn btn-info btn-sm ms-1 text-dark">
+                            <a href="registrasi_admin.php" class="btn btn-info btn-sm ms-lg-1 mb-1 mb-lg-0 text-dark">
                                 <i class="bi bi-person-plus-fill"></i> Tambah Admin
                             </a>
                         <?php endif; ?>
-                    </div>
+                        </div>
                 </div>
             </div>
             <div class="card-body">
                 
                 <form action="halaman_surat.php" method="GET" class="mb-3">
                     <div class="row g-2">
-                        <div class="col-md-5">
+                        <div class="col-md-5 mb-1 mb-md-0">
                             <input type="text" name="search" class="form-control form-control-sm" 
                                    placeholder="Cari perihal, kode, tujuan, konseptor..." 
                                    value="<?php echo htmlspecialchars($search_term); ?>">
                         </div>
-                        <div class="col-md-2">
+                        <div class="col-md-2 mb-1 mb-md-0">
                             <select name="filter_tahun" class="form-select form-select-sm">
                                 <option value="">Semua Tahun</option>
                                 <?php while($tahun_row = $tahun_list_result->fetch_assoc()): ?>
@@ -174,7 +151,7 @@ $sql = "SELECT * FROM tb_surat" . $sql_where . " ORDER BY $order_by LIMIT $limit
                                 <?php endwhile; ?>
                             </select>
                         </div>
-                        <div class="col-md-2">
+                        <div class="col-md-2 mb-1 mb-md-0">
                             <input type="number" name="filter_nomor" class="form-control form-control-sm"
                                    placeholder="Nomor >= (misal: 10)"
                                    value="<?php echo htmlspecialchars($filter_nomor); ?>">
@@ -202,7 +179,6 @@ $sql = "SELECT * FROM tb_surat" . $sql_where . " ORDER BY $order_by LIMIT $limit
                                     return '';
                                 }
                                 function getSortUrl($column_name, $toggle_order, $search, $tahun, $nomor) {
-                                    // Path sudah benar (halaman_surat.php)
                                     return "halaman_surat.php?sort=$column_name&order=$toggle_order&search=" . htmlspecialchars($search) . "&filter_tahun=" . htmlspecialchars($tahun) . "&filter_nomor=" . htmlspecialchars($nomor);
                                 }
                                 ?>
@@ -240,19 +216,23 @@ $sql = "SELECT * FROM tb_surat" . $sql_where . " ORDER BY $order_by LIMIT $limit
                                     echo "<td>" . htmlspecialchars($row["nama_konseptor"]) . "</td>";
                                     echo "<td>" . htmlspecialchars($row["unit_bidang"]) . "</td>";
                                     
-                                    // ▼▼▼ PERBAIKAN 6: Path Link (href="edit.php" SUDAH BENAR) ▼▼▼
-                                    echo '<td>
+                                    echo '<td class="text-nowrap">
                                             <a href="edit.php?id=' . $row["id"] . '" class="btn btn-info btn-sm text-white" title="Edit Data">
                                                 <i class="bi bi-pencil-square"></i>
-                                            </a>
-                                            <a href="../core/hapus.php?id=' . $row["id"] . '" class="btn btn-danger btn-sm text-white" title="Arsipkan Data" onclick="return confirm(\'Apakah Anda yakin ingin MENGARSIPKAN data ini? Data akan dipindah ke halaman arsip.\')">
-                                            <i class="bi bi-archive-fill"></i> </a>
-                                          </td>';
+                                            </a>';
+                                    
+                                    if (isset($_SESSION['role']) && $_SESSION['role'] === 'superadmin') {
+                                        echo ' <a href="../core/hapus.php?id=' . $row["id"] . '" class="btn btn-danger btn-sm text-white" title="Arsipkan Data" onclick="return confirm(\'Apakah Anda yakin ingin MENGARSIPKAN data ini? Data akan dipindah ke halaman arsip.\')">
+                                                    <i class="bi bi-archive-fill"></i>
+                                               </a>';
+                                    }
+                                    
+                                    echo '</td>';
                                     
                                     echo "</tr>";
                                 }
                             } else {
-                                echo "<tr><td colspan='10' class='text-center'>Data arsip tidak ditemukan</td></tr>"; // PERBAIKAN: Colspan 10
+                                echo "<tr><td colspan='10' class='text-center'>Data arsip tidak ditemukan</td></tr>";
                             }
                             $stmt->close();
                             $koneksi->close();
@@ -264,7 +244,6 @@ $sql = "SELECT * FROM tb_surat" . $sql_where . " ORDER BY $order_by LIMIT $limit
                 <nav aria-label="Page navigation">
                     <ul class="pagination justify-content-end pagination-sm">
                         <?php 
-                        // Path sudah benar (halaman_surat.php)
                         $base_url = "halaman_surat.php?sort=$sort_column&order=$sort_order&search=" . htmlspecialchars($search_term) . "&filter_tahun=" . htmlspecialchars($filter_tahun) . "&filter_nomor=" . htmlspecialchars($filter_nomor);
                         ?>
 
@@ -301,9 +280,7 @@ $sql = "SELECT * FROM tb_surat" . $sql_where . " ORDER BY $order_by LIMIT $limit
       </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
     <script>
-    // ### 2. FUNGSI JAVASCRIPT MODAL ###
     function showModalNotification(message, type = 'success') {
         const modalElement = document.getElementById('notificationModal');
         if (!modalElement) return;
@@ -312,12 +289,9 @@ $sql = "SELECT * FROM tb_surat" . $sql_where . " ORDER BY $order_by LIMIT $limit
         const modalBody = document.getElementById('notificationModalBody');
         const modalHeader = document.getElementById('notificationModalHeader');
         const modalCloseButton = modalHeader.querySelector('.btn-close');
-
-        // Reset classes
-        modalHeader.classList.remove('bg-success', 'bg-danger', 'bg-info', 'bg-warning');
+        modalHeader.classList.remove('bg-success', 'bg-danger', 'bg-info', 'bg-warning', 'text-white', 'text-dark');
         modalTitle.classList.remove('text-white', 'text-dark');
         modalCloseButton.classList.remove('btn-close-white');
-
         switch (type) {
             case 'danger':
                 modalTitle.textContent = 'Gagal!';
@@ -346,16 +320,12 @@ $sql = "SELECT * FROM tb_surat" . $sql_where . " ORDER BY $order_by LIMIT $limit
         modalBody.textContent = message;
         modal.show();
     }
-
-    // ### 3. PEMICU NOTIFIKASI (UNTUK halaman_surat.php) ###
     document.addEventListener('DOMContentLoaded', function () {
         const urlParams = new URLSearchParams(window.location.search);
         const status = urlParams.get('status');
-
         if (status) {
             let message = '';
             let type = 'success';
-
             switch (status) {
                 case 'sukses':
                     message = 'Data surat baru berhasil disimpan!';
@@ -370,10 +340,8 @@ $sql = "SELECT * FROM tb_surat" . $sql_where . " ORDER BY $order_by LIMIT $limit
                     type = 'info';
                     break;
             }
-
             if (message) {
                 showModalNotification(message, type);
-                // Bersihkan URL agar notifikasi tidak muncul lagi saat refresh
                 history.replaceState(null, '', window.location.pathname);
             }
         }

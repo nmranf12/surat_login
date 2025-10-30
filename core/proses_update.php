@@ -1,6 +1,6 @@
 <?php
 // --- 1. MENYERTAKAN KONEKSI DATABASE ---
-// ▼▼▼ PERBAIKAN 1: Path 'include' ▼▼▼
+
 include 'koneksi.php';
 
 // --- 2. VALIDASI METODE REQUEST ---
@@ -44,7 +44,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // --- 6. EKSEKUSI QUERY DAN PENGALIHAN (REDIRECT) ---
     if ($stmt->execute()) {
-        // ▼▼▼ PERBAIKAN 2: Path 'header' (redirect) ▼▼▼
+     
         header("Location: ../admin/halaman_surat.php?status=update_sukses");
     } else {
         echo "Error: " . $stmt->error;
@@ -55,7 +55,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $koneksi->close();
 
 } else {
-    // ▼▼▼ PERBAIKAN 3: Path 'header' (redirect) ▼▼▼
+  
     header("Location: ../index.php");
 }
 ?>
