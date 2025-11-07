@@ -2,18 +2,16 @@
 
 include '../core/auth_check.php';
 
-include '../core/koneksi.php'; // Koneksi dibuka
+include '../core/koneksi.php';
 
 $pesan_sukses = '';
 
-// 1. Logika saat Admin menyimpan pengaturan baru
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Cek apakah ini form untuk 'next_number'
+ 
     if (isset($_POST['next_number']) && is_numeric($_POST['next_number'])) {
         $nomor_baru = intval($_POST['next_number']);
         $tahun_baru = intval($_POST['tahun']);
 
-        // Update nomor di database
         $stmt_update = $koneksi->prepare("UPDATE tb_counter SET next_number = ?, tahun = ? WHERE id = 1");
         $stmt_update->bind_param("ii", $nomor_baru, $tahun_baru);
         
@@ -24,7 +22,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 
-// Ambil data counter saat ini untuk ditampilkan di form
 $stmt_get = $koneksi->prepare("SELECT next_number, tahun FROM tb_counter WHERE id = 1");
 $stmt_get->execute();
 $result = $stmt_get->get_result();
@@ -34,11 +31,8 @@ $stmt_get->close();
 $nomor_sekarang = $counter['next_number'];
 $tahun_sekarang = $counter['tahun'];
 
-// 3. Ambil daftar tahun unik dari tabel AKTIF (tb_surat)
-//    Ini diperlukan untuk Opsi Arsip (jika superadmin)
 $tahun_list_result_aktif = $koneksi->query("SELECT DISTINCT(tahun) FROM tb_surat WHERE tahun IS NOT NULL ORDER BY tahun DESC");
 
-// Tutup koneksi di akhir
 $koneksi->close();
 ?>
 
@@ -48,45 +42,114 @@ $koneksi->close();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Setting Nomor Surat</title>
-    <link rel="icon" href="../assets/logo-ciamis.ico" type="image/x-icon">
+    <link rel="icon" href="../assets/logo-ciamis.png" type="image/x-icon">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="../assets/style.css">
-</head>
+
+    <style>
+        :root {
+            --purple: #6f42c1;
+            --purple-dark: #5a369e;
+            --purple-light: #e0d8f0;
+            --secondary-bg: #f0f2f5;
+            --card-border-color: rgba(0,0,0,.125);
+        }
+        body {
+            background-color: var(--secondary-bg);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .navbar {
+            background-color: var(--purple) !important;
+            border-bottom: 1px solid var(--purple-dark);
+        }
+        .navbar-brand .navbar-logo {
+            height: 35px;
+            width: auto;
+        }
+        .card {
+            border-radius: 10px;
+            border: none;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .card-header {
+            border-bottom: 1px solid var(--card-border-color);
+            background-color: #fff;
+            padding: 1.25rem 1.5rem;
+        }
+        .card-footer {
+            background-color: #fcfcfc;
+            border-top: 1px solid var(--card-border-color);
+            padding: 1rem 1.5rem;
+        }
+        .btn-primary {
+            background-color: var(--purple);
+            border-color: var(--purple);
+        }
+        .btn-primary:hover {
+            background-color: var(--purple-dark);
+            border-color: var(--purple-dark);
+        }
+        .btn-outline-primary {
+            color: var(--purple);
+            border-color: var(--purple);
+        }
+        .btn-outline-primary:hover {
+            background-color: var(--purple);
+            color: #fff;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: var(--purple-light);
+            box-shadow: 0 0 0 0.25rem rgba(111, 66, 193, 0.25);
+        }
+        .nav-tabs .nav-link {
+            color: var(--purple);
+        }
+        .nav-tabs .nav-link.active {
+            color: #495057;
+            background-color: #fff;
+            border-color: #dee2e6 #dee2e6 #fff;
+        }
+    </style>
+    </head>
 <body>
 
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+    <nav class="navbar navbar-expand-lg navbar-dark shadow-sm" style="background-color: var(--purple) !important;">
       <div class="container-fluid">
         <a class="navbar-brand d-flex align-items-center" href="halaman_surat.php">
-          <img src="../assets/logo-ciamis.ico" alt="Logo BKPSDM Ciamis" class="navbar-logo me-2">
-          Panel Admin
+          <img src="../assets/logo-ciamis.png" alt="Logo BKPSDM Ciamis" class="navbar-logo me-2">
+          Pengaturan Penomoran Surat Dan Arsip Surat
         </a>
         <div class="collapse navbar-collapse">
-          <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+          <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center">
             <li class="nav-item">
               <span class="navbar-text me-3">
                 Login sebagai: <?php echo htmlspecialchars($_SESSION['nama_lengkap']); ?>
               </span>
             </li>
-            <li class="nav-item"><a href="halaman_surat.php" class="btn btn-light me-2">Kembali ke Data Surat</a></li>
-            <li class="nav-item"><a href="../core/logout.php" class="btn btn-danger"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
+            <li class="nav-item"><a href="halaman_surat.php" class="btn btn-light me-2"><i class="bi bi-arrow-left-circle me-2"></i>Kembali ke Data Surat</a></li>
+            <li class="nav-item"><a href="../core/logout.php" class="btn btn-danger"><i class="bi bi-box-arrow-right me-2"></i> Logout</a></li>
           </ul>
         </div>
       </div>
     </nav>
 
-    <div class="container form-container mt-4" style="max-width: 600px;">
+    <div class="container form-container mt-4" style="max-width: 900px;">
         
-        <div class="card shadow-sm">
-            <div class="card-header bg-primary text-white">
-                <h4 class="mb-0"><i class="bi bi-gear-fill"></i> Pengaturan Nomor Surat</h4>
-            </div>
-            <div class="card-body p-4">
-                <?php if ($pesan_sukses): ?>
+        <div class="row justify-content-center">
+            <div class="col-lg-12"> <?php if ($pesan_sukses): ?>
                     <div class="alert alert-success" role="alert">
                         <?php echo $pesan_sukses; ?>
                     </div>
                 <?php endif; ?>
+            </div>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-header" style="background-color: var(--purple); color: #fff;">
+                <h4 class="mb-0"><i class="bi bi-gear-fill me-2"></i> Pengaturan Nomor Surat</h4>
+            </div>
+            <div class="card-body p-4">
                 <form action="setting_nomor.php" method="POST">
                     <div class="mb-3">
                         <label for="next_number" class="form-label">Atur Nomor Surat Berikutnya</label>
@@ -100,7 +163,7 @@ $koneksi->close();
                     </div>
                     <hr>
                     <div class="d-grid">
-                        <button type="submit" class="btn btn-primary"><i class="bi bi-save-fill"></i> Simpan Pengaturan</button>
+                        <button type="submit" class="btn btn-primary btn-lg"><i class="bi bi-save-fill me-2"></i> Simpan Pengaturan</button>
                     </div>
                 </form>
             </div>
@@ -111,7 +174,7 @@ $koneksi->close();
         
             <div class="card shadow-sm mt-4 mb-4">
                 <div class="card-header bg-danger text-white">
-                    <h5 class="mb-0"><i class="bi bi-archive-fill"></i> Arsipkan Data (Reset)</h5>
+                    <h5 class="mb-0"><i class="bi bi-archive-fill me-2"></i> Arsipkan Data (Reset)</h5>
                 </div>
                 <div class="card-body p-4">
                     <p class="text-danger">
@@ -149,8 +212,8 @@ $koneksi->close();
                                     </select>
                                 </div>
                                 <div class="d-grid">
-                                    <button type="submit" class="btn btn-danger" <?php echo ($tahun_list_result_aktif->num_rows == 0) ? 'disabled' : ''; ?>>
-                                        <i class="bi bi-archive-fill"></i> Arsipkan Berdasarkan Tahun
+                                    <button type="submit" class="btn btn-danger btn-lg" <?php echo ($tahun_list_result_aktif->num_rows == 0) ? 'disabled' : ''; ?>>
+                                        <i class="bi bi-archive-fill me-2"></i> Arsipkan Berdasarkan Tahun
                                     </button>
                                 </div>
                             </form>
@@ -171,8 +234,8 @@ $koneksi->close();
                                     </div>
                                 </div>
                                 <div class="d-grid">
-                                    <button type="submit" class="btn btn-danger">
-                                        <i class="bi bi-calendar-range-fill"></i> Arsipkan Berdasarkan Tanggal
+                                    <button type="submit" class="btn btn-danger btn-lg">
+                                        <i class="bi bi-calendar-range-fill me-2"></i> Arsipkan Berdasarkan Tanggal
                                     </button>
                                 </div>
                             </form>
@@ -211,7 +274,7 @@ $koneksi->close();
         const modalBody = document.getElementById('notificationModalBody');
         const modalHeader = document.getElementById('notificationModalHeader');
         const modalCloseButton = modalHeader.querySelector('.btn-close');
-        modalHeader.classList.remove('bg-success', 'bg-danger', 'bg-info', 'bg-warning');
+        modalHeader.classList.remove('bg-success', 'bg-danger', 'bg-info', 'bg-warning', 'btn-primary');
         modalTitle.classList.remove('text-white', 'text-dark');
         modalCloseButton.classList.remove('btn-close-white');
         switch (type) {
@@ -223,8 +286,9 @@ $koneksi->close();
                 break;
             case 'info':
                 modalTitle.textContent = 'Informasi';
-                modalHeader.classList.add('bg-info', 'text-dark');
-                modalTitle.classList.add('text-dark');
+                modalHeader.classList.add('btn-primary', 'text-white');
+                modalTitle.classList.add('text-white');
+                modalCloseButton.classList.add('btn-close-white');
                 break;
             case 'warning':
                 modalTitle.textContent = 'Peringatan';

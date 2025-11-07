@@ -1,7 +1,7 @@
 <?php 
-// 1. KUNCI HALAMAN
+
 include '../core/auth_check.php'; 
-// (Kode PHP Anda sudah benar)
+
 include '../core/koneksi.php';
 $tahun_list_result = $koneksi->query("SELECT DISTINCT(tahun) FROM tb_surat_arsip WHERE tahun IS NOT NULL ORDER BY tahun DESC");
 $limit = 10; 
@@ -59,40 +59,141 @@ if ($sort_column == 'tahun') {
 } else {
     $order_by = "$sort_column $sort_order, tahun DESC, nomor_surat DESC";
 }
-$sql = "SELECT * FROM tb_surat_arsip" . $sql_where . " ORDER BY $order_by LIMIT $limit OFFSET $offset";
+
+$sql = "SELECT * FROM tb_surat_arsip" . $sql_where . " ORDER BY $order_by LIMIT ? OFFSET ?";
 ?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Data Arsip Surat</title> <link rel="icon" href="../assets/logo-ciamis.ico" type="image/x-icon">
+    <title>Data Arsip Surat</title>
+    <link rel="icon" href="../assets/logo-ciamis.ico" type="image/x-icon">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="../assets/style.css">
-</head>
+
+    <style>
+        :root {
+            --purple: #6f42c1;
+            --purple-dark: #5a369e;
+            --purple-light: #e0d8f0;
+            --secondary-bg: #f0f2f5;
+            --card-border-color: rgba(0,0,0,.125);
+        }
+        body {
+            background-color: var(--secondary-bg);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .navbar {
+            background-color: var(--purple) !important;
+            border-bottom: 1px solid var(--purple-dark);
+        }
+        .navbar-brand .navbar-logo {
+            height: 35px;
+            width: auto;
+        }
+        .card {
+            border-radius: 10px;
+            border: none;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .card-header {
+            border-bottom: 1px solid var(--card-border-color);
+            background-color: #fff;
+            padding: 1.25rem 1.5rem;
+        }
+        .card-footer {
+            background-color: #fcfcfc;
+            border-top: 1px solid var(--card-border-color);
+            padding: 1rem 1.5rem;
+        }
+        .btn-primary {
+            background-color: var(--purple);
+            border-color: var(--purple);
+        }
+        .btn-primary:hover {
+            background-color: var(--purple-dark);
+            border-color: var(--purple-dark);
+        }
+        .btn-outline-primary {
+            color: var(--purple);
+            border-color: var(--purple);
+        }
+        .btn-outline-primary:hover {
+            background-color: var(--purple);
+            color: #fff;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: var(--purple-light);
+            box-shadow: 0 0 0 0.25rem rgba(111, 66, 193, 0.25);
+        }
+        .pagination .page-item .page-link {
+            color: var(--purple);
+        }
+        .pagination .page-item.active .page-link {
+            background-color: var(--purple);
+            border-color: var(--purple);
+            color: #fff;
+        }
+   
+        .table-custom-header th {
+            background-color: var(--purple-dark);
+            color: #fff;
+            border-color: var(--purple-dark);
+        }
+        .table-custom-header th a {
+            color: #fff;
+            text-decoration: none;
+        }
+        .table-custom-header th a:hover {
+            text-decoration: underline;
+        }
+     
+        .table.align-middle th, .table.align-middle td {
+            vertical-align: middle;
+        }
+        .table:not(.table-sm) th, .table:not(.table-sm) td {
+            padding-top: 0.9rem;
+            padding-bottom: 0.9rem;
+            padding-left: 1.2rem;
+            padding-right: 1.2rem;
+        }
+  
+        .header-button-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            justify-content: flex-end;
+        }
+    </style>
+    </head>
 <body>
 
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+    <nav class="navbar navbar-expand-lg navbar-dark shadow-sm">
       <div class="container-fluid">
         <a class="navbar-brand d-flex align-items-center" href="halaman_surat.php">
-          <img src="../assets/logo-ciamis.ico" alt="Logo BKPSDM Ciamis" class="navbar-logo me-2">
+          <img src="../assets/logo-ciamis.png" alt="Logo BKPSDM Ciamis" class="navbar-logo me-2">
          Sistem Informasi Penomoran Surat
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
           <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarContent">
-          <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+          <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-lg-center">
             <li class="nav-item">
               <span class="navbar-text me-3">
-                Selamat datang, <?php echo htmlspecialchars($_SESSION['nama_lengkap']); ?>
+                Halo, <strong class="ms-1"><?php echo htmlspecialchars($_SESSION['nama_lengkap']); ?></strong>
               </span>
             </li>
-            <li class="nav-item"><a href="../index.php" class="btn btn-light me-2">Dashboard Publik</a></li>
+            <li class="nav-item">
+                <a href="../index.php" class="btn btn-light me-2">
+                    <i class="bi bi-speedometer2 me-2"></i>Dashboard Publik
+                </a>
+            </li>
             <li class="nav-item">
               <a href="../core/logout.php" class="btn btn-danger">
-                <i class="bi bi-box-arrow-right"></i> Logout
+                <i class="bi bi-box-arrow-right me-2"></i> Logout
               </a>
             </li>
           </ul>
@@ -102,34 +203,36 @@ $sql = "SELECT * FROM tb_surat_arsip" . $sql_where . " ORDER BY $order_by LIMIT 
     <div class="container-fluid mt-4">
 
     <div class="card shadow-sm">
-        <div class="card-header bg-white">
-            <div class="row align-items-center">
+        <div class="card-header bg-white" style="padding: 1.5rem;">
+            <div class="row align-items-center justify-content-between gy-3">
                 <div class="col-lg-6">
-                    <h4 class="mb-0">Data Arsip Surat</h4> </div>
-                <div class="col-lg-6 text-lg-end mt-2 mt-lg-0">
-                    <a href="../form.php" class="btn btn-primary btn-sm mb-1 mb-lg-0">
-                        <i class="bi bi-plus-circle-fill"></i> Input Baru
-                    </a>
-                    <a href="../core/export_arsip.php?search=<?php echo htmlspecialchars($search_term); ?>&filter_tahun=<?php echo htmlspecialchars($filter_tahun); ?>&filter_nomor=<?php echo htmlspecialchars($filter_nomor); ?>&sort=<?php echo $sort_column; ?>&order=<?php echo $sort_order; ?>" class="btn btn-success btn-sm ms-lg-1 mb-1 mb-lg-0">
-                        <i class="bi bi-file-earmark-excel-fill"></i> Export Arsip Ini
-                    </a>
-                    <a href="halaman_surat.php" class="btn btn-info btn-sm ms-lg-1 mb-1 mb-lg-0 text-dark">
-                        <i class="bi bi-arrow-left-circle-fill"></i> Kembali ke Data Aktif
-                    </a>
-                     </div>
+                    <h4 class="mb-0">Data Arsip Surat</h4> 
+                </div>
+                <div class="col-lg-6">
+                    <div class="header-button-group">
+                        <a href="../core/export_arsip.php?search=<?php echo htmlspecialchars($search_term); ?>&filter_tahun=<?php echo htmlspecialchars($filter_tahun); ?>&filter_nomor=<?php echo htmlspecialchars($filter_nomor); ?>&sort=<?php echo $sort_column; ?>&order=<?php echo $sort_order; ?>" class="btn btn-outline-success">
+                            <i class="bi bi-file-earmark-excel-fill me-2"></i> Export Arsip Ini
+                        </a>
+                        <a href="halaman_surat.php" class="btn btn-outline-primary">
+                            <i class="bi bi-arrow-left-circle-fill me-2"></i> Kembali ke Data Aktif
+                        </a>
+                    </div>
+                </div>
             </div>
-        </div>
-        <div class="card-body">
-            
-            <form action="halaman_arsip.php" method="GET" class="mb-3"> <div class="row g-2">
-                    <div class="col-md-5 mb-1 mb-md-0">
-                        <input type="text" name="search" class="form-control form-control-sm" 
+
+            <hr class="my-4">
+
+            <form action="halaman_arsip.php" method="GET" class="mb-0"> 
+                <div class="row g-3">
+                    <div class="col-lg-5">
+                        <input type="text" name="search" class="form-control" 
                                placeholder="Cari perihal, kode, tujuan, konseptor..." 
                                value="<?php echo htmlspecialchars($search_term); ?>">
                     </div>
-                    <div class="col-md-2 mb-1 mb-md-0">
-                        <select name="filter_tahun" class="form-select form-select-sm">
+                    <div class="col-lg-2">
+                        <select name="filter_tahun" class="form-select">
                             <option value="">Semua Tahun</option>
+                            <?php mysqli_data_seek($tahun_list_result, 0); ?>
                             <?php while($tahun_row = $tahun_list_result->fetch_assoc()): ?>
                                 <option value="<?php echo $tahun_row['tahun']; ?>" <?php echo ($tahun_row['tahun'] == $filter_tahun) ? 'selected' : ''; ?>>
                                     <?php echo $tahun_row['tahun']; ?>
@@ -137,24 +240,27 @@ $sql = "SELECT * FROM tb_surat_arsip" . $sql_where . " ORDER BY $order_by LIMIT 
                             <?php endwhile; ?>
                         </select>
                     </div>
-                    <div class="col-md-2 mb-1 mb-md-0">
-                        <input type="number" name="filter_nomor" class="form-control form-control-sm"
+                    <div class="col-lg-2">
+                        <input type="number" name="filter_nomor" class="form-control"
                                placeholder="Nomor >= (misal: 10)"
                                value="<?php echo htmlspecialchars($filter_nomor); ?>">
                     </div>
-                    <div class="col-md-3 d-flex">
-                        <button type="submit" class="btn btn-info btn-sm text-dark">
-                            <i class="bi bi-search"></i> Filter
+                    <div class="col-lg-3 d-flex">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-search me-2"></i> Filter
                         </button>
-                        <a href="halaman_arsip.php" class="btn btn-danger btn-sm ms-1"> <i class="bi bi-arrow-counterclockwise"></i> Reset
+                        <a href="halaman_arsip.php" class="btn btn-outline-danger ms-2" title="Reset Filter"> 
+                            <i class="bi bi-arrow-counterclockwise"></i>
                         </a>
                     </div>
                 </div>
             </form>
-            
+        </div>
+        
+        <div class="card-body" style="padding: 0;">
             <div class="table-responsive">
-                <table class="table table-striped table-bordered table-hover">
-                    <thead class="table-dark">
+                <table class="table table-striped table-hover align-middle mb-0">
+                    <thead class="table-custom-header">
                         <tr>
                             <?php
                             function getSortIcon($column_name, $sort_column, $sort_order) {
@@ -167,12 +273,12 @@ $sql = "SELECT * FROM tb_surat_arsip" . $sql_where . " ORDER BY $order_by LIMIT 
                                 return "halaman_arsip.php?sort=$column_name&order=$toggle_order&search=" . htmlspecialchars($search) . "&filter_tahun=" . htmlspecialchars($tahun) . "&filter_nomor=" . htmlspecialchars($nomor);
                             }
                             ?>
-                            <th><a href="<?php echo getSortUrl('nomor_surat', $toggle_order, $search_term, $filter_tahun, $filter_nomor); ?>" class="text-white text-decoration-none">No. Surat <?php echo getSortIcon('nomor_surat', $sort_column, $sort_order); ?></a></th>
-                            <th><a href="<?php echo getSortUrl('tahun', $toggle_order, $search_term, $filter_tahun, $filter_nomor); ?>" class="text-white text-decoration-none">Tahun <?php echo getSortIcon('tahun', $sort_column, $sort_order); ?></a></th>
-                            <th><a href="<?php echo getSortUrl('kode_surat', $toggle_order, $search_term, $filter_tahun, $filter_nomor); ?>" class="text-white text-decoration-none">Kode Surat <?php echo getSortIcon('kode_surat', $sort_column, $sort_order); ?></a></th>
-                            <th><a href="<?php echo getSortUrl('perihal_surat', $toggle_order, $search_term, $filter_tahun, $filter_nomor); ?>" class="text-white text-decoration-none">Perihal Surat <?php echo getSortIcon('perihal_surat', $sort_column, $sort_order); ?></a></th>
+                            <th><a href="<?php echo getSortUrl('nomor_surat', $toggle_order, $search_term, $filter_tahun, $filter_nomor); ?>">No. Surat <?php echo getSortIcon('nomor_surat', $sort_column, $sort_order); ?></a></th>
+                            <th><a href="<?php echo getSortUrl('tahun', $toggle_order, $search_term, $filter_tahun, $filter_nomor); ?>">Tahun <?php echo getSortIcon('tahun', $sort_column, $sort_order); ?></a></th>
+                            <th><a href="<?php echo getSortUrl('kode_surat', $toggle_order, $search_term, $filter_tahun, $filter_nomor); ?>">Kode Surat <?php echo getSortIcon('kode_surat', $sort_column, $sort_order); ?></a></th>
+                            <th><a href="<?php echo getSortUrl('perihal_surat', $toggle_order, $search_term, $filter_tahun, $filter_nomor); ?>">Perihal Surat <?php echo getSortIcon('perihal_surat', $sort_column, $sort_order); ?></a></th>
                             <th>Isi Ringkasan</th>
-                            <th><a href="<?php echo getSortUrl('tanggal_surat', $toggle_order, $search_term, $filter_tahun, $filter_nomor); ?>" class="text-white text-decoration-none">Tanggal Surat <?php echo getSortIcon('tanggal_surat', $sort_column, $sort_order); ?></a></th>
+                            <th><a href="<?php echo getSortUrl('tanggal_surat', $toggle_order, $search_term, $filter_tahun, $filter_nomor); ?>">Tanggal Surat <?php echo getSortIcon('tanggal_surat', $sort_column, $sort_order); ?></a></th>
                             <th>Tujuan Surat</th>
                             <th>Nama Konseptor</th>
                             <th>Unit Bidang</th>
@@ -182,8 +288,14 @@ $sql = "SELECT * FROM tb_surat_arsip" . $sql_where . " ORDER BY $order_by LIMIT 
                    <tbody>
                         <?php
                         $stmt = $koneksi->prepare($sql);
-                        if (!empty($params)) { 
+          
+                        if (!empty($params)) {
+                            $types .= 'ii'; 
+                            $params[] = $limit;
+                            $params[] = $offset;
                             $stmt->bind_param($types, ...$params); 
+                        } else {
+                            $stmt->bind_param("ii", $limit, $offset); 
                         }
                         $stmt->execute();
                         $result = $stmt->get_result();
@@ -202,7 +314,7 @@ $sql = "SELECT * FROM tb_surat_arsip" . $sql_where . " ORDER BY $order_by LIMIT 
                                 echo "<td>" . htmlspecialchars($row["unit_bidang"]) . "</td>";
                                 
                                 echo '<td class="text-nowrap">
-                                    <a href="../core/hapus_permanen.php?id=' . $row["id"] . '" class="btn btn-danger btn-sm text-white" title="Hapus Permanen" onclick="return confirm(\'PERINGATAN: Anda akan menghapus data ini secara PERMANEN. Data tidak bisa dikembalikan. Lanjutkan?\')">
+                                    <a href="../core/hapus_permanen.php?id=' . $row["id"] . '" class="btn btn-danger btn-sm" title="Hapus Permanen" onclick="return confirm(\'PERINGATAN: Anda akan menghapus data ini secara PERMANEN. Data tidak bisa dikembalikan. Lanjutkan?\')">
                                         <i class="bi bi-trash-fill"></i>
                                     </a>
                                   </td>';
@@ -210,7 +322,7 @@ $sql = "SELECT * FROM tb_surat_arsip" . $sql_where . " ORDER BY $order_by LIMIT 
                                 echo "</tr>";
                             }
                         } else {
-                            echo "<tr><td colspan='10' class='text-center'>Data arsip tidak ditemukan</td></tr>";
+                            echo "<tr><td colspan='10' class='text-center p-5'>Data arsip tidak ditemukan</td></tr>";
                         }
                         $stmt->close();
                         $koneksi->close();
@@ -219,8 +331,8 @@ $sql = "SELECT * FROM tb_surat_arsip" . $sql_where . " ORDER BY $order_by LIMIT 
                 </table>
             </div>
 
-            <nav aria-label="Page navigation">
-                <ul class="pagination justify-content-end pagination-sm">
+            <nav aria-label="Page navigation" class="p-3">
+                <ul class="pagination justify-content-end pagination-sm mb-0">
                     <?php 
                     $base_url = "halaman_arsip.php?sort=$sort_column&order=$sort_order&search=" . htmlspecialchars($search_term) . "&filter_tahun=" . htmlspecialchars($filter_tahun) . "&filter_nomor=" . htmlspecialchars($filter_nomor);
                     ?>
@@ -228,9 +340,30 @@ $sql = "SELECT * FROM tb_surat_arsip" . $sql_where . " ORDER BY $order_by LIMIT 
                     <?php if($page > 1): ?>
                         <li class="page-item"><a class="page-link" href="<?php echo $base_url; ?>&page=<?php echo $page-1; ?>">Previous</a></li>
                     <?php endif; ?>
-                    <?php for($i = 1; $i <= $total_pages; $i++): ?>
+                    
+                    <?php
+                    $start_page = max(1, $page - 2);
+                    $end_page = min($total_pages, $page + 2);
+
+                    if ($start_page > 1) {
+                        echo '<li class="page-item"><a class="page-link" href="'.$base_url.'&page=1">1</a></li>';
+                        if ($start_page > 2) {
+                            echo '<li class="page-item disabled"><span class="page-link">...</span></li>';
+                        }
+                    }
+
+                    for($i = $start_page; $i <= $end_page; $i++): ?>
                         <li class="page-item <?php if($i == $page) echo 'active'; ?>"><a class="page-link" href="<?php echo $base_url; ?>&page=<?php echo $i; ?>"><?php echo $i; ?></a></li>
-                    <?php endfor; ?>
+                    <?php endfor;
+
+                     if ($end_page < $total_pages) {
+                        if ($end_page < $total_pages - 1) {
+                            echo '<li class="page-item disabled"><span class="page-link">...</span></li>';
+                        }
+                         echo '<li class="page-item"><a class="page-link" href="'.$base_url.'&page='.$total_pages.'">'.$total_pages.'</a></li>';
+                    }
+                    ?>
+                    
                     <?php if($page < $total_pages): ?>
                         <li class="page-item"><a class="page-link" href="<?php echo $base_url; ?>&page=<?php echo $page+1; ?>">Next</a></li>
                     <?php endif; ?>
@@ -260,7 +393,7 @@ $sql = "SELECT * FROM tb_surat_arsip" . $sql_where . " ORDER BY $order_by LIMIT 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
-    // ### FUNGSI JAVASCRIPT MODAL ###
+  
     function showModalNotification(message, type = 'success') {
         const modalElement = document.getElementById('notificationModal');
         if (!modalElement) return;
@@ -274,15 +407,18 @@ $sql = "SELECT * FROM tb_surat_arsip" . $sql_where . " ORDER BY $order_by LIMIT 
         modalCloseButton.classList.remove('btn-close-white');
         switch (type) {
             case 'danger':
-                modalTitle.textContent = 'Berhasil!';
+             
+                modalTitle.textContent = 'Berhasil Dihapus!';
                 modalHeader.classList.add('bg-danger', 'text-white');
                 modalTitle.classList.add('text-white');
                 modalCloseButton.classList.add('btn-close-white');
                 break;
             case 'info':
                 modalTitle.textContent = 'Informasi';
-                modalHeader.classList.add('bg-info', 'text-dark');
-                modalTitle.classList.add('text-dark');
+            
+                modalHeader.classList.add('btn-primary', 'text-white');
+                modalTitle.classList.add('text-white');
+                modalCloseButton.classList.add('btn-close-white');
                 break;
             case 'warning':
                 modalTitle.textContent = 'Peringatan';
@@ -306,9 +442,11 @@ $sql = "SELECT * FROM tb_surat_arsip" . $sql_where . " ORDER BY $order_by LIMIT 
         const status = urlParams.get('status');
         if (status === 'hapus_permanen_sukses') {
             showModalNotification('Data arsip telah berhasil dihapus permanen!', 'danger');
-            history.replaceState(null, '', window.location.pathname);
+         
+            const newUrl = window.location.pathname + window.location.search.replace(/[\?&]status=[^&]+/, '').replace(/^&/, '?');
+            history.replaceState(null, '', newUrl);
         }
     });
     </script>
 </body>
-</html>s
+</html>

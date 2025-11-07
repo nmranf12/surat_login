@@ -1,12 +1,9 @@
 <?php
-// --- 1. MENYERTAKAN KONEKSI DATABASE ---
 
 include 'koneksi.php';
 
-// --- 2. VALIDASI METODE REQUEST ---
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
-    // --- 3. PENGAMBILAN DATA POST (MENTAH/RAW) ---
     $id = $_POST['id'];
     $kode_surat     = $_POST['kode_surat'];
     $perihal_surat  = $_POST['perihal_surat'];
@@ -16,7 +13,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $nama_konseptor = $_POST['nama_konseptor'];
     $unit_bidang    = $_POST['unit_bidang'];
 
-    // 4. MENYIAPKAN PREPARED STATEMENT (Keamanan SQL Injection)
     $stmt = $koneksi->prepare(
         "UPDATE tb_surat SET 
             kode_surat = ?, 
@@ -29,7 +25,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
          WHERE id = ?"
     );
 
-    // 5. BIND PARAMETER KE STATEMENT 
+
     $stmt->bind_param(
         "sssssssi", 
         $kode_surat,
@@ -42,7 +38,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $id 
     );
 
-    // --- 6. EKSEKUSI QUERY DAN PENGALIHAN (REDIRECT) ---
     if ($stmt->execute()) {
      
         header("Location: ../admin/halaman_surat.php?status=update_sukses");
@@ -50,7 +45,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         echo "Error: " . $stmt->error;
     }
 
-    // --- 7. TUTUP STATEMENT DAN KONEKSI ---
     $stmt->close();
     $koneksi->close();
 
